@@ -450,7 +450,7 @@ impl SyncSession {
         let upload_data = UploadInfo {
             name: "spritesheet".to_owned(),
             contents: encoded_image,
-            hash: hash.clone(),
+            hash,
         };
 
         let id = backend.upload(upload_data)?.id;
@@ -532,23 +532,23 @@ impl SyncSession {
     fn write_manifest(&self) -> Result<(), SyncError> {
         log::trace!("Generating new manifest");
 
-        let mut manifest = Manifest::default();
-
-        manifest.inputs = self
-            .inputs
-            .iter()
-            .map(|(name, input)| {
-                (
-                    name.clone(),
-                    InputManifest {
-                        hash: input.hash.clone(),
-                        id: input.id,
-                        slice: input.slice,
-                        packable: input.config.packable,
-                    },
-                )
-            })
-            .collect();
+        let manifest = Manifest {
+            inputs: self
+                .inputs
+                .iter()
+                .map(|(name, input)| {
+                    (
+                        name.clone(),
+                        InputManifest {
+                            hash: input.hash.clone(),
+                            id: input.id,
+                            slice: input.slice,
+                            packable: input.config.packable,
+                        },
+                    )
+                })
+                .collect(),
+        };
 
         manifest.write_to_folder(self.root_config().folder())?;
 
@@ -566,11 +566,7 @@ impl SyncSession {
         let mut compatible_codegen_groups = HashMap::new();
 
         for (input_name, input) in &self.inputs {
-            let output_path = input
-                .config
-                .codegen_path
-                .as_ref()
-                .map(|path| path.as_path());
+            let output_path = input.config.codegen_path.as_deref();
 
             let compat = CodegenCompatibility { output_path };
 
@@ -686,11 +682,14 @@ impl SyncSession {
 }
 
 fn is_image_asset(path: &Path) -> bool {
-    match path.extension().and_then(|ext| ext.to_str()) {
-        // TODO: Expand the definition of images?
-        Some("png") | Some("jpg") => true,
-
-        _ => false,
+    let ext = path
+        .extension()
+        .and_then(|ext| ext.to_str())
+        .map(|ext| ext.to_ascii_lowercase());
+    if let Some(ext) = ext {
+        matches!(ext.as_str(), "png" | "jpg" | "bmp" | "gif" | "jpeg" | "tga")
+    } else {
+        false
     }
 }
 
@@ -757,11 +756,11 @@ pub enum SyncError {
 
 impl SyncError {
     pub fn is_rate_limited(&self) -> bool {
-        match self {
+        matches!(
+            self,
             Self::Backend {
                 source: SyncBackendError::RateLimited,
-            } => true,
-            _ => false,
-        }
+            }
+        )
     }
 }

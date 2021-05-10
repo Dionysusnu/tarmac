@@ -277,10 +277,7 @@ mod test {
             let upload_result = backend.upload(any_upload_info()).unwrap_err();
 
             assert_eq!(counter, 3);
-            assert!(match upload_result {
-                Error::RateLimited => true,
-                _ => false,
-            });
+            assert!(matches!(upload_result, Error::RateLimited));
         }
     }
 }
