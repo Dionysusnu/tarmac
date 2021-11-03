@@ -21,31 +21,12 @@ Tarmac is inspired by projects like [Webpack](https://webpack.js.org/) that make
 
 ## Installation
 
-### Installing with Foreman
-The recommended way to install Tarmac is with [Foreman](https://github.com/rojo-rbx/foreman).
-
-Add an entry to the `[tools]` section of your `foreman.toml` file:
-
-```toml
-foreman = { source = "Roblox/tarmac", version = "0.7.0" }
-```
-
-### Installing from GitHub Releases
-Pre-built binaries are available for 64-bit Windows, macOS, and Linux from the [GitHub releases page](https://github.com/Roblox/tarmac/releases).
-
 ### Installing from Source
-Tarmac requires Rust 1.39.0 or newer to build.
 
-You can build the latest release of Tarmac from crates.io:
-
-```bash
-cargo install tarmac
-```
-
-or build the latest work from the master branch:
+You can install this fork by running:
 
 ```bash
-cargo install --git https://github.com/Roblox/tarmac
+cargo install --git https://github.com/Dionysusnu/tarmac
 ```
 
 ## Basic Example
